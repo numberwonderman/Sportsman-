@@ -3,25 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sportsmen | Crystal Prediction</title>
+    <title>Sports Crystal | Elo Predictor</title>
     <style>
         body { font-family: sans-serif; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; align-items: center; padding: 2rem; }
         .card { background: #1e293b; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); width: 100%; max-width: 400px; margin-bottom: 2rem; }
         input { width: 100%; padding: 0.75rem; margin: 0.5rem 0; border-radius: 0.5rem; border: 2px solid transparent; background: #334155; color: white; }
-        .home-input { border-color: #3b82f6; }
-        .away-input { border-color: #ef4444; }
+        .home-input { border-color: #3b82f6; } /* Blue */
+        .away-input { border-color: #ef4444; } /* Red */
         button { width: 100%; padding: 0.75rem; background: #10b981; border: none; border-radius: 0.5rem; color: white; font-weight: bold; cursor: pointer; }
+        button:hover { background: #059669; }
         
         /* Crystal Styling */
         .crystal-container { perspective: 500px; margin-bottom: 2rem; }
         .crystal {
             width: 100px; height: 100px; background: #64748b;
-            transform-style: preserve-3d; transition: all 1s ease;
-            animation: rotate 5s infinite linear;
+            transform-style: preserve-3d; transition: all 0.5s ease;
+            animation: rotate 5s infinite linear; border-radius: 10px;
         }
         @keyframes rotate { from { transform: rotateY(0deg) rotateX(0deg); } to { transform: rotateY(360deg) rotateX(360deg); } }
         
-        .result { margin-top: 1rem; text-align: center; font-weight: bold; }
+        .result { margin-top: 1rem; text-align: center; font-weight: bold; font-size: 1.2rem; }
     </style>
 </head>
 <body>
@@ -31,7 +32,7 @@
 </div>
 
 <div class="card">
-    <h2>Sportsmen Predictor</h2>
+    <h2>Sports Crystal</h2>
     <input type="number" id="rating-home" class="home-input" placeholder="Home Team Elo">
     <input type="number" id="rating-away" class="away-input" placeholder="Away Team Elo">
     <button onclick="predict()">Consult the Crystal</button>
@@ -45,20 +46,25 @@
         const crystal = document.getElementById('crystal');
         const resDiv = document.getElementById('result');
         
-        if (isNaN(h) || isNaN(a)) return;
+        if (isNaN(h) || isNaN(a)) {
+            resDiv.innerHTML = "Please enter valid Elo ratings.";
+            return;
+        }
 
+        // Elo Probability Calculation
         const probHome = 1 / (1 + Math.pow(10, (a - h) / 400));
         
-        // Color logic
+        // Visual Logic
         if (probHome > 0.5) {
-            crystal.style.background = '#3b82f6'; // Blue
-            resDiv.innerHTML = "Home Team Favored";
+            crystal.style.background = '#3b82f6'; // Blue for Home
+            resDiv.innerHTML = `Home Favored (${(probHome * 100).toFixed(1)}%)`;
         } else {
-            crystal.style.background = '#ef4444'; // Red
-            resDiv.innerHTML = "Away Team Favored";
+            crystal.style.background = '#ef4444'; // Red for Away
+            resDiv.innerHTML = `Away Favored (${((1 - probHome) * 100).toFixed(1)}%)`;
         }
         
-        crystal.style.transform = "scale(1.5)";
+        // Pulse Effect
+        crystal.style.transform = "scale(1.3)";
         setTimeout(() => crystal.style.transform = "scale(1)", 500);
     }
 </script>
