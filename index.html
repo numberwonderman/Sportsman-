@@ -29,7 +29,7 @@
 
 <div class="card">
     <h3>AI Scouting Report</h3>
-    <textarea id="matchup-context" rows="3" placeholder="Enter teams and game context (e.g., 'Lakers vs Celtics, crucial playoff game')"></textarea>
+    <textarea id="matchup-context" rows="3" placeholder="Enter teams and game context..."></textarea>
     <input type="password" id="api-key" placeholder="Enter Gemini API Key">
     <button onclick="generateNarrative()">Generate Insight</button>
     <div id="ai-output" class="result">Insights require an API Key.</div>
@@ -62,15 +62,15 @@
 
         try {
             const ai = new GoogleGenAI({ apiKey: apiKey });
-            const prompt = `Provide a concise, 2-sentence statistical/strategic scouting report for this matchup: ${context}`;
+            // Using the string without the 'models/' prefix to match API expectations
             const response = await ai.models.generateContent({
                 model: 'gemini-1.5-flash',
-                contents: prompt
+                contents: `Provide a concise, 2-sentence scouting report for: ${context}`
             });
             output.innerText = response.text;
         } catch (e) {
-            output.innerText = "Error: Check your API Key.";
-            console.error(e);
+            output.innerText = "Error: Check console or API key.";
+            console.error("Full Error Details:", e);
         }
     };
 </script>
