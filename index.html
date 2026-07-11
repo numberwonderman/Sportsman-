@@ -3,48 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elo Pro | Statistical Matchup Engine</title>
+    <title>Sportotron | Elo & AI Analysis</title>
     <style>
-        body { font-family: sans-serif; background: #0f172a; color: #f8fafc; display: flex; justify-content: center; padding: 2rem; }
-        .card { background: #1e293b; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); width: 100%; max-width: 400px; }
-        input { width: 100%; padding: 0.75rem; margin: 0.5rem 0; border-radius: 0.5rem; border: none; box-sizing: border-box; }
-        button { width: 100%; padding: 0.75rem; background: #3b82f6; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: bold; margin-top: 1rem; }
-        button:hover { background: #2563eb; }
-        #result { margin-top: 1.5rem; padding: 1rem; background: #334155; border-radius: 0.5rem; text-align: center; }
+        body { font-family: sans-serif; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; align-items: center; padding: 2rem; }
+        .card { background: #1e293b; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); width: 100%; max-width: 400px; margin-bottom: 1rem; }
+        input { width: 100%; padding: 0.75rem; margin: 0.5rem 0; border-radius: 0.5rem; border: 2px solid transparent; box-sizing: border-box; background: #334155; color: white; }
+        
+        /* Color Coding */
+        .home-input { border-color: #3b82f6; } /* Blue */
+        .away-input { border-color: #ef4444; } /* Red */
+        
+        button { width: 100%; padding: 0.75rem; background: #10b981; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: bold; margin-top: 0.5rem; }
+        button:hover { background: #059669; }
+        .result { margin-top: 1rem; padding: 1rem; background: #0f172a; border-radius: 0.5rem; font-size: 0.9rem; }
+        .text-blue { color: #60a5fa; font-weight: bold; }
+        .text-red { color: #f87171; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <h2>Elo Matchup Predictor</h2>
-    <input type="number" id="rating-a" placeholder="Team A Elo (e.g. 1500)">
-    <input type="number" id="rating-b" placeholder="Team B Elo (e.g. 1600)">
-    <button onclick="calculate()">Calculate Win Probability</button>
-    
-    <div id="result">Enter ratings to see prediction.</div>
+    <input type="number" id="rating-home" class="home-input" placeholder="Home Team Elo (Blue)">
+    <input type="number" id="rating-away" class="away-input" placeholder="Away Team Elo (Red)">
+    <button onclick="calculate()">Calculate Probability</button>
+    <div id="result" class="result">Results will appear here.</div>
 </div>
 
-<script>
-    function calculate() {
-        const rA = parseFloat(document.getElementById('rating-a').value);
-        const rB = parseFloat(document.getElementById('rating-b').value);
-        const resDiv = document.getElementById('result');
+<div class="card">
+    <h3>AI Scouting Report (Optional)</h3>
+    <input type="password" id="api-key" placeholder="Enter Gemini API Key">
+    <button onclick="generateNarrative()">Generate Insight</button>
+    <div id="ai-output" class="result">Insights require an API Key.</div>
+</div>
 
-        if (isNaN(rA) || isNaN(rB)) {
-            resDiv.innerHTML = "Please enter valid numbers.";
-            return;
-        }
+<script type="module">
+    import { GoogleGenAI } from 'https://esm.run/@google/genai';
 
-        // Elo Win Probability Formula
-        const probA = 1 / (1 + Math.pow(10, (rB - rA) / 400));
-        const probB = 1 - probA;
+    window.calculate = function() {
+        const h = parseFloat(document.getElementById('rating-home').value);
+        const a = parseFloat(document.getElementById('rating-away').value);
+        if (isNaN(h) || isNaN(a)) return;
 
-        resDiv.innerHTML = `
-            <strong>Results:</strong><br>
-            Team A Win Prob: ${(probA * 100).toFixed(2)}%<br>
-            Team B Win Prob: ${(probB * 100).toFixed(2)}%
+        const probHome = 1 / (1 + Math.pow(10, (a - h) / 400));
+        document.getElementById('result').innerHTML = `
+            <span class="text-blue">Home Win Prob:</span> ${(probHome * 100).toFixed(2)}%<br>
+            <span class="text-red">Away Win Prob:</span> ${((1 - probHome) * 100).toFixed(2)}%
         `;
-    }
+    };
+
+    window.generateNarrative = async function() {
+        const apiKey = document.getElementById('api-key').value.trim();
+        if (!apiKey) { alert("Please provide an API Key."); return; }
+
+        const output = document.getElementById('ai-output');
+        output.innerHTML = "Analyzing...";
+
+        try {
+            const ai = new GoogleGenAI({ apiKey: apiKey });
+            const response = await ai.models.generateContent({
+                model: 'gemini-1.5-flash',
+                contents: "Provide a 1-sentence statistical analysis of a sports matchup between a home and away team."
+            });
+            output.innerText = response.text;
+        } catch (e) {
+            output.innerText = "Error: Check your API Key.";
+        }
+    };
 </script>
 </body>
 </html>
